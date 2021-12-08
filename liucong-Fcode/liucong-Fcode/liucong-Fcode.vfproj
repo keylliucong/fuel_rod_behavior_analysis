@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application" Version="11.0" ProjectIdGuid="{A9042441-7CFE-4E76-84D3-3DD14177A64C}">
+<VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application" Version="11.0" ProjectIdGuid="{3FBD5D8F-B27D-4144-A714-19B1FB2B4C37}">
 	<Platforms>
 		<Platform Name="Win32"/></Platforms>
 	<Configurations>
