@@ -3,6 +3,7 @@
     use physical_properties
     use hcore
     use match
+    implicit none
     contains
 
 
@@ -11,6 +12,7 @@
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!功率计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!功率计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     subroutine power_calculation
+    integer i
     real(8)::a,b
 
     p_line_max=p_line_average*p_line_factor
@@ -47,6 +49,8 @@
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!冷却剂温度计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!冷却剂温度计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     subroutine coolant_T_calculation(n_a)
+    integer i
+    integer n_a
     real(8)::a,b
     if (module_identification==1)then
         a=0
@@ -73,7 +77,8 @@
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!轴向温度计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!轴向温度计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     subroutine axis_T_calculation(time,n_a)
-    integer time
+    integer i
+    integer time,n_a
     cladding_T_surface=Temperature(time,n_a,n_radial+3)+p_line(n_a)&
         &/(pi*d(time,n_a,n_radial+2)*h_coefficient(time,n_a))
     cladding_T=cladding_T_surface                                       !!!!!!假设包壳内表面温度
@@ -108,7 +113,8 @@
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!温度更新!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!温度更新!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     subroutine axis_T_update(time,n_a)
-    integer time
+    integer i
+    integer time,n_a
     Temperature(time,n_a,n_radial+2)=cladding_T_surface
     Temperature(time,n_a,n_radial+1)=cladding_T_internal
     do i=1,n_radial
@@ -127,9 +133,10 @@
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!径向温度计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!径向温度计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     subroutine fuel_t_calculation(time1,n_a)
+    integer i
     integer time1,n_a
     dimension A(n_radial,n_radial),B(n_radial),X(n_radial),Tc(n_radial)
-    double precision A,B,X
+    double precision A,B,X,Tc
     real(8)::tt
     X(:)=0                                                  !!!!矩阵初始化
     tt=100.
@@ -182,10 +189,11 @@
     integer i,time11,n_a
     dimension A(n_radial+2,n_radial+2),B(n_radial+2),X(n_radial+2)
     dimension Tc(n_radial+2),transient(n_radial+2),Temperature_mid(t_number,n_axis,n_radial+3)
-    double precision A,B,X,transient,Temperature_mid
+    double precision A,B,X,transient,Temperature_mid,Tc
     real(8)::tt,rw,re,d_rw,d_re,heat
-    cladding_T_surface=Temperature_transient(time11,n_a,n_radial+3)+p_line(n_a)&
-        &/(pi*d(time11,n_a,n_radial+2)*h_coefficient(time11,n_a))
+    !cladding_T_surface=Temperature_transient(time11,n_a,n_radial+3)+p_line(n_a)&
+        !&/(pi*d(time11,n_a,n_radial+2)*h_coefficient(time11,n_a))
+    cladding_T_surface=500
     do i=1,n_radial+2
         Temperature_transient(time11,n_a,i)=cladding_T_surface
     end do
@@ -222,7 +230,7 @@
                 Temperature_mid(time11,n_a,i)=Temperature_transient(time11-1,n_a,i)
             end if
         end do
-        transient(1)=UO2_denstiy*UO2_Cp*(d(time11,n_a,2)/4.)**2./AT/2.
+        transient(1)=UO2_density*UO2_Cp*(d(time11,n_a,2)/4.)**2./AT/2.
         A(1,1)=-(1.*k_fuel(time11,n_a,1)/2.+transient(1))
         A(1,2)=1.*k_fuel(time11,n_a,1)/2.
         B(1)=-(0.5*P_SQUARE(time11,n_a,1)*(d(time11,n_a,2)/4.)**2.+transient(1)*Temperature_mid(time11,n_a,1))

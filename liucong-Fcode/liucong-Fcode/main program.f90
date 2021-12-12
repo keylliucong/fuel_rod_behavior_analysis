@@ -113,13 +113,13 @@
                 do j=1,n_axis
                     call P_S_calculation(i,j)
                     call coolant_physical_properties(j)
-                    heat_dv=100.
-                    heat_old=0.
-                    do while(abs(heat_dv)>0.1)          !迭代条件，储热收敛
+                    !heat_dv=100.
+                    !heat_old=0.
+                    !do while(abs(heat_dv)>0.1)          !迭代条件，储热收敛
                         call coolant_T_calculation(j)   !冷却剂温度计算
                         Temperature_transient(i,j,n_radial+3)=coolant_T_transient(j)        !赋值，存储冷却剂温度    
                         call T_transient_calculation(i,j)   !温度计算，TDMA
-                    end do
+                    !end do
                 end do
                 
                 !!!!!!!!!瞬态温度计算部分end

@@ -145,6 +145,7 @@
             call variable_return
             do i=1,n_axis
                 read (1003,*) (Temperature(1,i,j),j=1,n_radial+3)
+                Temperature(1,:,:)=500
             end do
             do i=1,t_number
                 read (1003,*) T_transient(i),p_average_transient(i)
