@@ -1,5 +1,6 @@
     module physical_properties
     use variables
+    implicit none
     contains
 
 

@@ -1,7 +1,7 @@
 module hcore
     use variables 
     use physical_properties 
-
+    implicit none
     contains
     
     
@@ -10,7 +10,8 @@ module hcore
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!对流换热系数!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!对流换热系数!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     function h_coefficient(t,n_axis)                 !!!!t代表时间t，n_axis代表轴向划分网格数
-    integer t
+    double precision h_coefficient
+    integer t,n_axis
     if (module_identification==1) then
         if (coolant_kind==1) then
             Re=(11096.0-1.3236*Temperature(t,n_axis,n_radial+3))*coolant_speed*De/(4.94e-4*exp(757.1/&
@@ -58,6 +59,7 @@ module hcore
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!气隙热导率Kg!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!气隙热导率Kg!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     function Kg(coolant_kind)
+    double precision Kg
     integer coolant_kind
         if(coolant_kind==1) then
             Kg=5678
@@ -110,7 +112,7 @@ module hcore
     
     
     subroutine P_S_calculation(time1,n_a)
-    integer time1,n_a
+    integer time1,n_a,n_r
     real(8)::P_SQUARE_AVERAGE,sum_p
     sum_p=0.
     p_square_average=4.*P_line(n_a)/(pi*(d(time1,n_a,n_radial)**2))
