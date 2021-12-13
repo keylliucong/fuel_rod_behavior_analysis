@@ -4,8 +4,8 @@
     use thermal_hydraulic
     use hcore
     use match
-    implicit none
 
+    integer i,j,k,l
 
 
     print*,"«Î ‰»Îº∆À„¿‡–Õ£¨1--Œ»Ã¨£ª2--À≤Ã¨"
