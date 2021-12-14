@@ -157,12 +157,16 @@
             read (1005,*)
             read (1005,*) coolant_V_flow,coolant_T_in,cladding_length,cladding_width,gas_gap,pitch
             read (1005,*)
-            read (1005,*) pellet_diameter,AT
+            read (1005,*) pellet_diameter
+            read (1005,*)t_number
             !-----------------------------------------------------------------------------参数初始化
             call variable_return
-            do i=1,n_axis
-                read (1005,*) Temperature(1,i,n_radial+3)
+            do i=1,t_number
+                read (1005,*) T_transient(i),p_average_transient(i)
             end do
+
+                Temperature(1,:,:)=500.
+
         end if
     end if
     end subroutine
@@ -184,6 +188,14 @@
     allocate(Bu_old(time,n_axis,n_radial))
     if (module_identification==2.AND.transient_mode==1) then
         allocate(Temperature_transient(t_number,n_axis,n_radial+3))
+        allocate(T_transient(t_number))
+        allocate(p_average_transient(t_number))
+        allocate(d(t_number,n_axis,n_radial+2))
+        allocate(coolant_T_transient(n_axis))
+        allocate(P_SQUARE(t_number,n_axis,n_radial-1))
+        allocate(k_fuel(t_number,n_axis,n_radial))
+    else  if (module_identification==2.AND.transient_mode==2) then
+        allocate(Temperature_transient(t_number,n_axis,n_radial+3))             !!!!!!!演算暂时，后续更改
         allocate(T_transient(t_number))
         allocate(p_average_transient(t_number))
         allocate(d(t_number,n_axis,n_radial+2))

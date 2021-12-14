@@ -31,6 +31,7 @@
 		<File RelativePath=".\main program.f90"/>
 		<File RelativePath=".\match.f90"/>
 		<File RelativePath=".\physical properties.f90"/>
+		<File RelativePath=".\thermal hydraulic transient.f90"/>
 		<File RelativePath=".\thermal hydraulic.f90"/>
 		<File RelativePath=".\variabless.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>

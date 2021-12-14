@@ -27,7 +27,13 @@
             x=x-0.001
         end if
     end do
-    do i=1,n_axis
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    !sin_average=(cos(0.)-cos(pi))/(pi)
+    !    Fq=1./sin_average   !!!!!!!!!!!!!!!!!验证瞬态程序，功率分布采取余弦
+    !    x=0.
+    !    p_line_max=p_line_average*Fq
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        do i=1,n_axis
         p_line(i)=p_line_max*sin(x+(i-1)*(pi-2*x)/(1.0*(n_axis-1)))
     end do
     do i=1,n_axis
@@ -63,6 +69,7 @@
             coolant_T_transient(n_a)=coolant_T_in
         else
             coolant_T_transient(n_a)=coolant_T_transient(n_a-1)+Q_line(n_a)/coolant_M_flow/coolant_Cp
+            
         end if
     end if
     end subroutine
@@ -191,11 +198,12 @@
     dimension Tc(n_radial+2),transient(n_radial+2),Temperature_mid(t_number,n_axis,n_radial+3)
     double precision A,B,X,transient,Temperature_mid,Tc
     real(8)::tt,rw,re,d_rw,d_re,heat
-    !cladding_T_surface=Temperature_transient(time11,n_a,n_radial+3)+p_line(n_a)&
-        !&/(pi*d(time11,n_a,n_radial+2)*h_coefficient(time11,n_a))
-    cladding_T_surface=500
+    cladding_T_surface=Temperature_transient(time11,n_a,n_radial+3)+p_line(n_a)&
+        &/(pi*d(time11,n_a,n_radial+2)*h_coefficient(time11,n_a))
+    
     do i=1,n_radial+2
         Temperature_transient(time11,n_a,i)=cladding_T_surface
+
     end do
 
 
@@ -258,6 +266,8 @@
             end if
 
         end do
+        
+        
         A(n_radial+2,n_radial+2)=1.
         B(n_radial+2)=cladding_T_surface
 
@@ -306,11 +316,11 @@
     end do
 
 
-
     do i=2,n_axis
         Q_line(i)=Q_line(i)-heat*length_every        !热量更新
     end do
     heat_dv=heat-heat_old                       !热量差值
+
 
     heat_old=heat
 
@@ -321,4 +331,11 @@
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!温度计算瞬态!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!温度计算瞬态!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!温度计算瞬态!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ 
+    
+    
+    
+    
+    
+    
     end module

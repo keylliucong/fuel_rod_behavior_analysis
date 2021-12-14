@@ -4,7 +4,7 @@
     use thermal_hydraulic
     use hcore
     use match
-
+    use thermal_hydraulic_transient
 
 
     print*,"请输入计算类型，1--稳态；2--瞬态"
@@ -88,7 +88,10 @@
 
 
 
-        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        
     else
         do i=1,t_number
             if (i==1) then
@@ -113,6 +116,41 @@
                 do j=1,n_axis
                     call P_S_calculation(i,j)
                     call coolant_physical_properties(j)
+                    heat_dv=100.
+                    heat_old=0.
+                   ! do while(abs(heat_dv)>0.1)          !迭代条件，储热收敛
+                        call coolant_T_calculation(j)   !冷却剂温度计算
+                        Temperature_transient(i,j,n_radial+3)=coolant_T_transient(j)        !赋值，存储冷却剂温度    
+                            
+                        call T_transient_calculation(i,j)   !温度计算，TDMA
+                !end do
+                 
+                end do
+                
+                !!!!!!!!!瞬态温度计算部分end
+
+                
+
+                    write(1004,60)Temperature_transient(i,11,1),Temperature_transient(i,11,n_radial)        !输出数据
+60                  format(2f9.3)
+
+
+            else
+                p_line_average=p_average_transient(i)
+                call power_calculation
+            !!!!!!!!!!!计算初始条件时燃耗begin （后续修改直接调用稳态计算值
+                do k=1,time
+                    do l=1,n_axis
+                        call Bu_calculation(k,l)
+                    end do
+                enddo
+                !!!!!!!!!!!计算初始条件时燃耗begin （后续修改直接调用稳态计算值
+                
+                 !!!!!!!!!瞬态温度计算部分begin
+                
+                do j=1,n_axis
+                    call P_S_calculation(i,j)
+                    call coolant_physical_properties(j)
                     !heat_dv=100.
                     !heat_old=0.
                     !do while(abs(heat_dv)>0.1)          !迭代条件，储热收敛
@@ -123,12 +161,10 @@
                 end do
                 
                 !!!!!!!!!瞬态温度计算部分end
-                
-                
-                do j=1,n_axis
-                    write(1004,60)(Temperature_transient(i,j,k),k=1,n_radial+3)         !输出数据
-60                  format(14f9.3)
-                end do
+
+                    write(1006,88)Temperature_transient(i,11,1),Temperature_transient(i,11,n_radial)
+88                  format(2f9.3)
+
                 write(1004,*)""
             end if
         end do
