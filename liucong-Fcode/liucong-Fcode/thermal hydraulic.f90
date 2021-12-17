@@ -104,9 +104,7 @@
         cladding_T=cladding_T_internal
     enddo
     !包壳迭代计算结束
-    pellet_T_surface=cladding_T_internal+P_line_max*log((d(time,n_a&!气隙换热，计算芯块外表面温度，Kg为假定
-    &,n_radial+2)-2*cladding_width)/pellet_diame&
-        &ter)/(2*pi*Kg(coolant_kind))
+    pellet_T_surface=cladding_T_internal+p_line(n_a)/(pi*d(time,n_a,n_radial)*Kg(coolant_kind))
     end subroutine
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!轴向温度计算结束!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!轴向温度计算结束!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
