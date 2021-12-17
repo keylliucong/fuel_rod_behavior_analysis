@@ -44,6 +44,7 @@
     real(8)::coolant_density                        !!!!冷却剂密度，单位kg/m3
     real(8)::coolant_T                              !!!!冷却剂温度，单位K
     real(8)::coolant_Cp                             !!!!冷却剂定压比热容，单位J/(kg*k)
+    real(8)::fuel_percentage                        !!!!燃料百分比，单位%
     real(8)::De                                     !!!!当量直径，单位m
     real(8)::coolant_M_flow                         !!!!冷却剂质量流量，单位kg/s
     real(8)::coolant_S                              !!!!冷却剂流通面积，单位m2

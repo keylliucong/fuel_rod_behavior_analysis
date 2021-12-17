@@ -3,7 +3,7 @@
     use physical_properties
     use hcore
     use match
-    implicit none
+
     contains
 
 

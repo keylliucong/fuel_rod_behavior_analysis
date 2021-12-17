@@ -10,7 +10,8 @@ module hcore
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!对流换热系数!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!对流换热系数!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     function h_coefficient(t,n_axis)                 !!!!t代表时间t，n_axis代表轴向划分网格数
-    integer t
+    double precision h_coefficient
+    integer t,n_axis
     if (module_identification==1) then
         if (coolant_kind==1) then
             Re=(11096.0-1.3236*Temperature(t,n_axis,n_radial+3))*coolant_speed*De/(4.94e-4*exp(757.1/&
@@ -58,9 +59,10 @@ module hcore
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!气隙热导率Kg!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!气隙热导率Kg!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     function Kg(coolant_kind)
+    double precision Kg
     integer coolant_kind
         if(coolant_kind==1) then
-            Kg=5678
+            Kg=5678.
         end if
     end function
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!气隙热导率Kg!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -73,7 +75,7 @@ module hcore
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!燃耗与体积功率计算Bu&P!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!燃耗与体积功率计算Bu&P!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     subroutine Bu_calculation(time1,n_a)
-    integer n_a,time1,n_r,day
+    integer n_a,time1,n_r,day,i
     real(8)::sum_q
     day=1
     sum_q=0.
@@ -110,7 +112,7 @@ module hcore
     
     
     subroutine P_S_calculation(time1,n_a)
-    integer time1,n_a
+    integer time1,n_a,n_r
     real(8)::P_SQUARE_AVERAGE,sum_p
     sum_p=0.
     p_square_average=4.*P_line(n_a)/(pi*(d(time1,n_a,n_radial)**2))
@@ -151,16 +153,17 @@ module hcore
         FR=1.-0.2/(1.+EXP((Temperature(time1,n_a,n_r)-900.)/80.))!!!!!!!!!!!!!FR辐照因子
         k_fuel(time1,n_a,n_r)=k0*FD*FM*FR               !!!!!!!!二氧化铀真实导热系数
     else
-        k0=1./(0.0375+(2.165d-4)*Temperature_transient(time1,n_a,n_r))+4.715d9*exp(-16361./Temperature_transient(time1,n_a,n_r))/Temperature_transient(time1,n_a,n_r)**2
-        !!!!!!!!!!!!!!!!k0-未考虑燃耗作用的二氧化铀导热系数
-        FD=(1.09/(Bu(time,n_a,n_r)/9.383)**3.265+0.0643/((Bu(time,n_a,n_r)/9.383)**0.5)*(Temperature_transient(time1,n_a,n_r)**0.5)&
-         &)*ATAN2(1.0,(1.09/((Bu(time,n_a,n_r)/9.383)**3.265)+0.0643/((Bu(time,n_a,n_r)/9.383)**0.5)*(Temperature_transient(time1,n_a,n_r)**0.5)))
-        !!!!!!!!!!!!!!!!FD-溶解因子
-        FP=1+(0.019*(Bu(time,n_a,n_r)/9.383)/(3.-0.019*(Bu(time,n_a,n_r)/9.383)))*(1./(1.+EXP(-(Temperature_transient(time1,n_a,n_r)-1200)/100.)))
-        !!!!!!!!!!!!!!!!FP-沉淀因子
-        FM=(1-P)/(1+(S-1)*P)!!!!!!!!!FM-孔隙因子
-        FR=1.-0.2/(1.+EXP((Temperature_transient(time1,n_a,n_r)-900.)/80.))!!!!!!!!!!!!!FR辐照因子
-        k_fuel(time1,n_a,n_r)=k0*FD*FM*FR               !!!!!!!!二氧化铀真实导热系数   
+        !k0=1./(0.0375+(2.165d-4)*Temperature_transient(time1,n_a,n_r))+4.715d9*exp(-16361./Temperature_transient(time1,n_a,n_r))/Temperature_transient(time1,n_a,n_r)**2
+        !!!!!!!!!!!!!!!!!k0-未考虑燃耗作用的二氧化铀导热系数
+        !FD=(1.09/(Bu(time,n_a,n_r)/9.383)**3.265+0.0643/((Bu(time,n_a,n_r)/9.383)**0.5)*(Temperature_transient(time1,n_a,n_r)**0.5)&
+        ! &)*ATAN2(1.0,(1.09/((Bu(time,n_a,n_r)/9.383)**3.265)+0.0643/((Bu(time,n_a,n_r)/9.383)**0.5)*(Temperature_transient(time1,n_a,n_r)**0.5)))
+        !!!!!!!!!!!!!!!!!FD-溶解因子
+        !FP=1+(0.019*(Bu(time,n_a,n_r)/9.383)/(3.-0.019*(Bu(time,n_a,n_r)/9.383)))*(1./(1.+EXP(-(Temperature_transient(time1,n_a,n_r)-1200)/100.)))
+        !!!!!!!!!!!!!!!!!FP-沉淀因子
+        !FM=(1-P)/(1+(S-1)*P)!!!!!!!!!FM-孔隙因子
+        !FR=1.-0.2/(1.+EXP((Temperature_transient(time1,n_a,n_r)-900.)/80.))!!!!!!!!!!!!!FR辐照因子
+        !k_fuel(time1,n_a,n_r)=k0*FD*FM*FR               !!!!!!!!二氧化铀真实导热系数   
+        k_fuel(:,:,:)=5678.
     end if
     end subroutine
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!UO2芯块热导率计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
