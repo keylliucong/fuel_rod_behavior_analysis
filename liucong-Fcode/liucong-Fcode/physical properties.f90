@@ -1,6 +1,6 @@
     module physical_properties
     use variables
-
+    implicit none
     contains
 
 
@@ -11,7 +11,7 @@
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!冷却剂物性及相关参数计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     subroutine coolant_physical_properties(n_a)
     integer n_a
-    if (module_identification==1) then
+    if (model_identification==1) then
         coolant_Cp=(159.0-0.0272*coolant_T_in+7.12e-6*coolant_T_in**2)
         coolant_speed=4.56
         coolant_V_flow=coolant_speed*(pitch**2.-pi/4.*d(1,n_a,n_radial+2)**2.)

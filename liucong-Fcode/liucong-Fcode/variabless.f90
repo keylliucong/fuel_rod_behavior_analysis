@@ -7,7 +7,7 @@
     integer::n_axis                     !!!!轴向划分网格数
     integer::n_radial                   !!!!径向划分网格数
     integer::coolant_kind               !!!!指定冷却剂种类，1--水；2--铅铋
-    integer::module_identification      !!!!模式识别，1--稳态；2--瞬态
+    integer::model_identification      !!!!模式识别，1--稳态；2--瞬态
     integer::transient_mode             !!!!瞬时输入参数方式识别，1--功率；2--包壳温度
     real(8)::pi                         !!!!圆周率，常量
     real(8)::p_line_factor              !!!!功率因子
@@ -95,12 +95,24 @@
 
 
     contains
+    
+    
+    subroutine model_select
+    open (1111,file='shurukapian.txt')
+    read (1111,*)
+    read (1111,*)
+    read (1111,*) model_identification
+    if (model_identification==1) then
+        read (1111,*)
+        read (1111,*) transient_mode
+    end if 
+    end subroutine
 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!打开文件夹!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!打开文件夹!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!打开文件夹!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     subroutine open_file
-    if (module_identification==1) then
+    if (model_identification==1) then
         open(1001,file='wentaishuru\canshushuru.txt')
         open(1002,file='wentaishuchu\canshushuchu.txt')
     else
@@ -124,7 +136,7 @@
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!输入参数!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     subroutine read_file
     integer i,j
-    if (module_identification==1) then
+    if (model_identification==1) then
         read (1001,*)
         read (1001,*) time,n_axis,n_radial,coolant_kind,p_line_factor,p_line_average
         read (1001,*)
@@ -187,7 +199,7 @@
     allocate(Temperature(time,n_axis,n_radial+3))
     allocate(Bu(time,n_axis,n_radial))
     allocate(Bu_old(time,n_axis,n_radial))
-    if (module_identification==2.AND.transient_mode==1) then
+    if (model_identification==2.AND.transient_mode==1) then
         allocate(Temperature_transient(t_number,n_axis,n_radial+3))
         allocate(T_transient(t_number))
         allocate(p_average_transient(t_number))
@@ -195,7 +207,7 @@
         allocate(coolant_T_transient(n_axis))
         allocate(P_SQUARE(t_number,n_axis,n_radial-1))
         allocate(k_fuel(t_number,n_axis,n_radial))
-    else  if (module_identification==2.AND.transient_mode==2) then
+    else  if (model_identification==2.AND.transient_mode==2) then
         allocate(Temperature_transient(t_number,n_axis,n_radial+3))             !!!!!!!演算暂时，后续更改
         allocate(T_transient(t_number))
         allocate(p_average_transient(t_number))

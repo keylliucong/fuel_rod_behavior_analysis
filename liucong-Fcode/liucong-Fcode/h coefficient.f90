@@ -1,7 +1,7 @@
 module hcore
     use variables 
     use physical_properties 
-
+    implicit none
     contains
     
     
@@ -12,7 +12,7 @@ module hcore
     function h_coefficient(t,n_axis)                 !!!!t代表时间t，n_axis代表轴向划分网格数
     double precision h_coefficient
     integer t,n_axis
-    if (module_identification==1) then
+    if (model_identification==1) then
         if (coolant_kind==1) then
             Re=(11096.0-1.3236*Temperature(t,n_axis,n_radial+3))*coolant_speed*De/(4.94e-4*exp(757.1/&
                 &Temperature(t,n_axis,n_radial+3)))
@@ -109,6 +109,8 @@ module hcore
         
     end if
     end subroutine
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     
     
     subroutine P_S_calculation(time1,n_a)
@@ -141,7 +143,7 @@ module hcore
     real(8)::S,P,B,k0,fd,fp,fm,fr
     S=1.5           !!!!!!!!!!形状因子
     P=0.05          !!!!!!!!!!芯块孔隙率
-    if (module_identification==1) then
+    if (model_identification==1) then
         k0=1./(0.0375+(2.165d-4)*Temperature(time1,n_a,n_r))+4.715d9*exp(-16361./Temperature(time1,n_a,n_r))/Temperature(time1,n_a,n_r)**2
         !!!!!!!!!!!!!!!!k0-未考虑燃耗作用的二氧化铀导热系数
         FD=(1.09/(Bu(time1,n_a,n_r)/9.383)**3.265+0.0643/((Bu(time1,n_a,n_r)/9.383)**0.5)*(Temperature(time1,n_a,n_r)**0.5)&

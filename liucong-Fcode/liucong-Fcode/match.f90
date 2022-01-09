@@ -2,7 +2,7 @@ module match
 	use variables 
 	use hcore
 	use physical_properties
-
+    implicit none
     contains
 	
 	

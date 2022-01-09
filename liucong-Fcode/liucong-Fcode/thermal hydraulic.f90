@@ -3,7 +3,7 @@
     use physical_properties
     use hcore
     use match
-
+    implicit none
     contains
 
 
@@ -58,7 +58,7 @@
     integer i
     integer n_a
     real(8)::a,b
-    if (module_identification==1)then
+    if (model_identification==1)then
         a=0
         a=(n_a-1)*cladding_length/((n_axis-1)*1.0)
         Q_line(n_a)=p_line_max*cladding_length/(pi-2*x)*(cos(x)-cos(x+a*(pi-2*x)/cladding_length))
@@ -149,8 +149,10 @@
     do while(tt>0.01)
         do i=1,n_radial
             call fuel_coefficient_calculation(time1,n_a,i)
+
         end do
         !!!!!!!系数矩阵赋值开始!!!!!!!!
+
         A(1,1)=1.
         A(1,2)=-1.
         B(1)=0.5*P_SQUARE(TIME1,n_a,1)*(d(time1,n_a,2)**2)/4./k_fuel(time1,n_a,1)
@@ -159,6 +161,7 @@
             A(i,i+1)=(d(time1,n_a,i)+d(time1,n_a,i+1))/(d(time1,n_a,i+1)-d(time1,n_a,i))/2.*k_fuel(time1,n_a,i)
             A(i,i)=-(A(i,i-1)+A(i,i+1))
             B(i)=-1.*P_SQUARE(TIME1,n_a,i)*d(time1,n_a,i)/2.*(d(time1,n_a,i+1)-d(time1,n_a,i-1))/4.
+           
         end do
         A(n_radial,n_radial)=1.
         B(n_radial)=pellet_T_surface
