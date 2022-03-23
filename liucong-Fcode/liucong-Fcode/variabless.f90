@@ -10,8 +10,18 @@
     integer::model_identification      !!!!模式识别，1--稳态；2--瞬态
     integer::transient_mode             !!!!瞬时输入参数方式识别，1--功率；2--包壳温度
     
+    
+    integer,parameter::N_clad=2         !包壳分层数
     real(8)::day
     real(8)::time_total,time_increment  !机械计算时间参数，单位h
+    real(8)::do_original,di_original                !用于机械计算的原始尺寸
+    real(8)::press_inter
+    real(8)::press_begin
+    real(8)::d_length_spring            !弹簧压缩长度，m
+    real(8)::aaa                        !周向应变，输出值
+    real(8)::stress_cladding_z111,strain_cladding_z111
+    
+    
     
     
     real(8)::pi                         !!!!圆周率，常量
@@ -34,7 +44,7 @@
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!中间变量声明!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!中间变量声明!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     parameter(pi=3.1415926)
-    real,allocatable::p_line(:)                     !!!!线功率，单位W/m
+    allocatable::p_line(:)                     !!!!线功率，单位W/m
     real,allocatable::Q_line(:)                     !!!!轴向各点热量，单位W
     real,allocatable::Temperature(:,:,:)            !!!!任意时刻，任意位置处温度，n_radial+1代表包壳内表面温度；n_radial+2代表包壳外表面温度；n_radial+3代表冷却剂温度，单位K
     real,allocatable::d(:,:,:)                      !!!!任意时刻，任意位置处直径，n_radial+1代表包壳内径；n_radial+2代表包壳外径，单位m
@@ -42,6 +52,41 @@
     real,allocatable::Bu_old(:,:,:)                 !!!!上一时刻，任意位置处，燃耗，单位MWD/kg
     real,allocatable::k_fuel(:,:,:)                 !!!!任意时刻，任意位置处，芯块热导率，单位W/m*K
     real,allocatable::P_SQUARE(:,:,:)               !!!!任意时刻，任意位置处，体积功率，单位W/m3
+    
+    
+    real(8),allocatable::T_pre(:)
+    real(8),allocatable::T_now(:)
+    real(8),allocatable::Bu_begin(:)
+    allocatable::BU_end(:)
+    real(8),allocatable::UR_pra(:)                     !机械计算后输出半径值m
+    real(8),allocatable::P_contact(:)                  !机械计算后接触压力，MPa
+    !弹簧计算参数，m
+    real(8),allocatable::d_length_p(:)
+    real(8),allocatable::d_length_c(:)
+    !屈服极限参数，MPa
+    real(8),allocatable::yield(:,:)
+    real(8),allocatable::yield_stress(:)
+    real(8),allocatable::yield_stress111(:)
+    real(8),allocatable::plastic(:,:,:)
+    real(8),allocatable::strain_plastic(:,:)
+    real(8),allocatable::strain_plastic111(:,:)
+    real(8),allocatable::stress_equ(:)
+    real(8),allocatable::strain_fuel(:,:)
+    real(8),allocatable::strain_creep(:,:)
+    real(8),allocatable::strain_creep111(:,:)
+    real(8),allocatable::strain_creep_nb(:,:,:)
+    real(8),allocatable::strain_creep_nb111(:,:,:)
+    real(8),allocatable::stress_cladding_z(:)
+    real(8),allocatable::strain_cladding_z(:)
+    real(8),allocatable::stress_equ_wh(:,:)
+    real(8),allocatable::strain_fuel_wh(:,:,:)
+    dimension strain_z_lasttime(2),strain_z_lasttime111(2)
+    double precision strain_z_lasttime,strain_z_lasttime111
+    double precision p_line,Bu_end
+    
+    
+    
+    
     real(8)::p_line_max                             !!!!最大线功率，单位W/m
     real(8)::x                                      !!!!功率函数截尾位置，单位m
     real(8)::sin_average                            !!!!余弦平均值
@@ -202,8 +247,32 @@
     allocate(p_line(n_axis))
     allocate(Q_line(n_axis))
     allocate(Temperature(time,n_axis,n_radial+3))
+    allocate(T_pre(n_radial+2))
+    allocate(T_now(n_radial+2))
     allocate(Bu(time,n_axis,n_radial))
     allocate(Bu_old(time,n_axis,n_radial))
+    allocate(Bu_begin(n_radial+2))
+    allocate(Bu_end(n_radial+2))
+    allocate(UR_pra(n_radial+2))
+    allocate(P_contact(n_axis))
+    allocate(d_length_p(n_axis))
+    allocate(d_length_c(n_axis))
+    allocate(yield(n_axis,n_radial+N_clad))
+    allocate(yield_stress(n_radial+N_clad))
+    allocate(yield_stress111(n_radial+N_clad))
+    allocate(plastic(n_axis,n_radial+N_clad,3))
+    allocate(strain_plastic(n_radial+N_clad,3))
+    allocate(strain_plastic111(n_radial+N_radial,3))
+    allocate(stress_equ(n_radial+N_clad))
+    allocate(strain_fuel(n_radial,3))
+    allocate(strain_creep(n_clad,3))
+    allocate(strain_creep111(n_clad,3))
+    allocate(strain_creep_nb(n_axis,n_clad,3))
+    allocate(strain_creep_nb111(n_axis,n_clad,3))
+    allocate(stress_cladding_z(n_axis))
+    allocate(strain_cladding_z(n_axis))
+    allocate(stress_equ_wh(n_axis,n_radial+n_clad))
+    allocate(strain_fuel_wh(n_axis,n_radial,3))
     if (model_identification==2.AND.transient_mode==1) then
         allocate(Temperature_transient(t_number,n_axis,n_radial+3))
         allocate(T_transient(t_number))
@@ -225,6 +294,8 @@
         allocate(P_SQUARE(time,n_axis,n_radial-1))
         allocate(k_fuel(time,n_axis,n_radial))
     end if
+    do_original=pellet_diameter+2*gas_gap+2*cladding_width
+    di_original=pellet_diameter+2*gas_gap
     d(:,:,n_radial+2)=pellet_diameter+2*gas_gap+2*cladding_width    !!!!初始时刻，包壳外径，单位m
     d(:,:,n_radial+1)=pellet_diameter+2*gas_gap                     !!!!初始时刻，包壳内径，单位m
     coolant_S=pitch**2.-pi/4.*(pellet_diameter+2*gas_gap+&          !!!!流通面积，单位m2

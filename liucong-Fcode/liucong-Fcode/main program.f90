@@ -68,27 +68,115 @@
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!冷却剂温度计算结束!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!冷却剂温度计算结束!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-        
-        
-        
-        
-        
+
+        d_length_spring=0.02    !m，初始受压
+        strain_creep=0.
+        strain_creep111=0.
+        strain_creep_nb=0.
+        strain_creep_nb111=0.
+        do i=1,n_axis
+            do j=1,n_radial+N_CLAD
+                if (j<=n_radial) then
+                    yield(i,j)=5.d16        !芯块看作不屈服，直接开裂
+                else
+                    yield(i,j)=5.1d8        !包壳屈服极限
+                end if
+            end do
+        end do
+
+
         !时间循环开始
         do i=1,time     !单位day
             day=1.*i
             time_total=day*24.
             time_increment=24.
-            print*,day,time_total,time_increment
+            press_inter=10.
+            press_begin=10.
+
             !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!轴向温度计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!轴向温度计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!轴向温度计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             !!!!!!!!!!!!!!!时间循环
             do j=1,n_axis                                           !!!!!!!!!!!!!!!轴向循环
-                call axis_T_calculation(i,j)                        !!!!!!!!!!!!!!!轴向温度计算
-                call axis_T_update(i,j)                             !!!!!!!!!!!!!!!温度更新
-                call Bu_calculation(i,j)                            !!!!!!!!!!!!!!!燃耗计算
-                call P_S_calculation(i,j)
-                call fuel_t_calculation(i,j)                        !!!!!!!!!!!!!!!芯块温度计算
+
+
+
+                do k=1,n_radial+N_clad
+                    yield_stress(k)=yield(j,k)
+                    strain_plastic(k,1)=plastic(j,k,1)
+                    strain_plastic(k,2)=plastic(j,k,2)
+                    strain_plastic(k,3)=plastic(j,k,3)
+                end do
+                do k=1,N_CLAD
+                    strain_creep(k,1)=strain_creep_nb(j,k,1)
+                    strain_creep(k,2)=strain_creep_nb(j,k,2)
+                    strain_creep(k,3)=strain_creep_nb(j,k,3)
+                end do
+
+                !do while
+                    call axis_T_calculation(i,j)                        !!!!!!!!!!!!!!!轴向温度计算
+                    call axis_T_update(i,j)                             !!!!!!!!!!!!!!!温度更新
+                    call Bu_calculation(i,j)                            !!!!!!!!!!!!!!!燃耗计算
+                    call P_S_calculation(i,j)
+                    call fuel_t_calculation(i,j)                        !!!!!!!!!!!!!!!芯块温度计算
+                    do k=1,n_radial+2
+                        if (i==1) then
+                            T_pre(k)=Temperature(i,j,k)
+                            T_now(k)=T_pre(k)
+                        else
+                            T_pre(k)=Temperature(i-1,j,k)
+                            T_now(k)=Temperature(i,j,k)
+                        end if
+                        Bu_begin(k)=4.*p_line(j)/(pi*(d(i,j,k)**2))*(day-1)/(UO2_density*238./270.)/10.**6.
+                        Bu_end(k)=4.*p_line(j)/(pi*(d(i,j,k)**2))*day/(UO2_density*238./270.)/10.**6.
+                    end do
+                    !热工计算结束
+
+                    !机械计算开始
+
+                    call  MECHMODEL_unrigid(time_total,time_increment,p_line(j),do_original,di_original,T_PRE,T_NOW,gas_gap,BU_BEGIN,BU_END,n_radial,PRESS_INTER,PRESS_BEGIN,UR_PRA,P_contact(j),&
+                        &N_CLAD,d_length_spring,d_length_p(j),d_length_c(j),yield_stress,yield_stress111,strain_plastic,strain_plastic111&
+                        &,aaa,strain_z_lasttime,strain_z_lasttime111,stress_equ,strain_fuel,strain_creep,strain_creep111&
+                        &,stress_cladding_z111,strain_cladding_z111)
+                !end do !end dowhile
+
+
+
+
+                stress_cladding_z(j)=stress_cladding_z111
+                strain_cladding_z(j)=strain_cladding_z111
+
+                strain_creep=strain_creep111
+
+
+                do k=1,N_CLAD
+                    strain_creep_nb(j,k,1)=strain_creep(k,1)
+                    strain_creep_nb(j,k,2)=strain_creep(k,2)
+                    strain_creep_nb(j,k,3)=strain_creep(k,3)
+                end do
+
+                strain_z_lasttime=strain_z_lasttime111
+
+                do k=1,N_radial+N_CLAD
+                    yield(j,k)=yield_stress111(k)
+                    plastic(j,k,1)=strain_plastic111(k,1)
+                    plastic(j,k,2)=strain_plastic111(k,2)
+                    plastic(j,k,3)=strain_plastic111(k,3)
+
+                    stress_equ_wh(j,k)=stress_equ(k)
+                    if (k<=n_radial) then
+                        strain_fuel_wh(j,k,1)=strain_fuel(k,1)
+                        strain_fuel_wh(j,k,2)=strain_fuel(k,2)
+                        strain_fuel_wh(j,k,3)=strain_fuel(k,3)
+                    end if
+
+                end do
+
+
+
+
+
+
             end do
 
             !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!轴向温度计算结束!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -96,15 +184,7 @@
             !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!轴向温度计算结束!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-            !热工计算结束
 
-            !机械计算开始
-
-           !  call  MECHMODEL_unrigid(time_total,time_increment,p_line(i),D0,DI,T_PRE,T_NOW,X_FC,BU_BEGIN,BU_END,NH,PRESS_INTER,PRESS_BEGIN,UR_PRA,P_contact,&
-           !    &N_CLAD,d_length_spring,d_length_p,d_length_c,yield_stress,yield_stress111,strain_plastic,strain_plastic111&
-           !     &,deng,strain_z_lasttime,strain_z_lasttime111,stress_equ,strain_fuel,strain_creep,strain_creep111&
-           !&,stress_cladding_z,strain_cladding_z)
-            
 
 
 
@@ -151,15 +231,15 @@
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!数据输出!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
 
 
 
