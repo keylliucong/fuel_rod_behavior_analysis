@@ -77,9 +77,8 @@ module hcore
     subroutine Bu_calculation(time1,n_a)
     integer n_a,time1,n_r,day,i
     real(8)::sum_q
-    day=1
     sum_q=0.
-    Bu_average=4.*p_line(n_a)/(pi*(d(time1,n_a,n_radial)**2))*day/(UO2_density*238./270.)/10.**6.
+    Bu_average=4.*p_line(n_a)/(pi*(d(time1,n_a,n_radial)**2))*time1/(UO2_density*238./270.)/10.**6.
     Bu(time1,n_a,:)=Bu_average
     
     if (time1==1) then

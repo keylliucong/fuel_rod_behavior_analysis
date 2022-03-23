@@ -9,6 +9,11 @@
     integer::coolant_kind               !!!!指定冷却剂种类，1--水；2--铅铋
     integer::model_identification      !!!!模式识别，1--稳态；2--瞬态
     integer::transient_mode             !!!!瞬时输入参数方式识别，1--功率；2--包壳温度
+    
+    real(8)::day
+    real(8)::time_total,time_increment  !机械计算时间参数，单位h
+    
+    
     real(8)::pi                         !!!!圆周率，常量
     real(8)::p_line_factor              !!!!功率因子
     real(8)::p_line_average             !!!!平均线功率密度，单位W/m
