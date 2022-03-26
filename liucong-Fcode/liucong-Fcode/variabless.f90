@@ -83,7 +83,7 @@
     dimension strain_z_lasttime(2),strain_z_lasttime111(2)
     double precision strain_z_lasttime,strain_z_lasttime111
     double precision p_line,Bu_end
-    
+    real(8),allocatable::Temperature_JS(:)          !迭代计算使用的中间量
     
     
     
@@ -273,6 +273,7 @@
     allocate(strain_cladding_z(n_axis))
     allocate(stress_equ_wh(n_axis,n_radial+n_clad))
     allocate(strain_fuel_wh(n_axis,n_radial,3))
+    allocate(Temperature_JS(n_axis))
     if (model_identification==2.AND.transient_mode==1) then
         allocate(Temperature_transient(t_number,n_axis,n_radial+3))
         allocate(T_transient(t_number))

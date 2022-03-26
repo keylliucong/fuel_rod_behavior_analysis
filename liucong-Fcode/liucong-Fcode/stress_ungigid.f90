@@ -1554,9 +1554,10 @@ end do
 
 
      !!!!!!!!!!!!!!!!!!判断进入塑性与否!!!!!!!!!!!!!!!!
-
+ 
      factor=0
      do i=nh+1,nh+N_CLAD
+          
       !write(*,*)  stress_equ(i),yield_stress(i)
        if (stress_equ(i)>yield_stress(i)) then
 
@@ -1598,6 +1599,7 @@ if (factor==0) then
        !exit  !没有任何一点进入塑性变形，故跳出do while 循环
 
        do i=nh+1,nh+N_CLAD
+              
        yield_stress111(i)=yield_stress(i)
        strain_plastic111(i,1)=strain_plastic(i,1)
        strain_plastic111(i,2)=strain_plastic(i,2)
@@ -1618,11 +1620,11 @@ else
 
      !factor=0
      do i=nh+1,nh+N_CLAD
-
+         
        if (stress_equ(i)>yield_stress(i)) then
 
        write(*,*) i,"进入塑性"
-       !pause
+      
 
          d_strain_plastic(i,1)=-0.0001
          d_strain_plastic(i,2)=0.
