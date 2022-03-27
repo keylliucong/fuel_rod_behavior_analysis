@@ -104,12 +104,18 @@ module hcore
         end do
         Bu(time1,n_a,n_radial-1)=(Bu(time1,n_a,n_radial-2)*pi*(1.0**2.)-sum_q)/(pi*(1.-0.9**2.))
      
-        do i=1,n_radial
-            Bu(time1,n_a,i)=Bu(time1,n_a,i)+Bu_old(time1,n_a,i)
-
-        end do
+        !do i=1,n_radial
+        !    Bu(time1,n_a,i)=Bu(time1,n_a,i)+Bu_old(time1,n_a,i)
+        !
+        !end do
         
     end if
+    if(time1==100) then
+        print*,bu_average
+        end if
+    if(time1==1000) then
+        print*,bu_average
+        end if
     end subroutine
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -143,16 +149,17 @@ module hcore
     subroutine fuel_coefficient_calculation(time1,n_a,n_r)
     integer time1,n_a,n_r
     real(8)::S,P,B,k0,fd,fp,fm,fr
+    
     S=1.5           !!!!!!!!!!形状因子
     P=0.05          !!!!!!!!!!芯块孔隙率
     if (model_identification==1) then
        
         k0=1./(0.0375+(2.165d-4)*Temperature(time1,n_a,n_r))+4.715d9*exp(-16361./Temperature(time1,n_a,n_r))/Temperature(time1,n_a,n_r)**2
         !!!!!!!!!!!!!!!!k0-未考虑燃耗作用的二氧化铀导热系数
-        FD=(1.09/(Bu_average/9.383)**3.265+0.0643/((Bu_average/9.383)**0.5)*(Temperature(time1,n_a,n_r)**0.5)&
-         &)*ATAN2(1.0,(1.09/((Bu_average/9.383)**3.265)+0.0643/((Bu_average/9.383)**0.5)*(Temperature(time1,n_a,n_r)**0.5)))
+        FD=(1.09/(Bu(time1,n_a,n_r)/9.383)**3.265+0.0643/((Bu(time1,n_a,n_r)/9.383)**0.5)*(Temperature(time1,n_a,n_r)**0.5)&
+         &)*ATAN2(1.0,(1.09/((Bu(time1,n_a,n_r)/9.383)**3.265)+0.0643/((Bu(time1,n_a,n_r)/9.383)**0.5)*(Temperature(time1,n_a,n_r)**0.5)))
         !!!!!!!!!!!!!!!!FD-溶解因子
-        FP=1+(0.019*(Bu_average/9.383)/(3.-0.019*(Bu_average/9.383)))*(1./(1.+EXP(-(Temperature(time1,n_a,n_r)-1200)/100.)))
+        FP=1+(0.019*(Bu(time1,n_a,n_r)/9.383)/(3.-0.019*(Bu(time1,n_a,n_r)/9.383)))*(1./(1.+EXP(-(Temperature(time1,n_a,n_r)-1200)/100.)))
         !!!!!!!!!!!!!!!!FP-沉淀因子
         FM=(1-P)/(1+(S-1)*P)!!!!!!!!!FM-孔隙因子
         FR=1.-0.2/(1.+EXP((Temperature(time1,n_a,n_r)-900.)/80.))!!!!!!!!!!!!!FR辐照因子
