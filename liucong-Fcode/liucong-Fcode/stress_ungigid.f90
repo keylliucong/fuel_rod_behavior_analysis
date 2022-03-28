@@ -23,7 +23,7 @@ SUBROUTINE MECHMODEL_unrigid(time_total,time_increment,Q_LINE,D0,DI,T_PRE,T_NOW,
 
 
 IMPLICIT none
-integer,PARAMETER::NB=20 
+integer,PARAMETER::NB=21 
 integer::NH,i
 real(8)::H
 real(8)::D0,DI,X_FC
@@ -157,6 +157,7 @@ p_coolant=15.5   !mpa
 PIE=3.1415926 
 RFS=(DI-2.*X_FC)/2.             !芯块外径
 DH=H/NB
+
 TSINT=1300.+273.15              !烧结温度
 UO2_IDEALDENSITY=10.96*10.**3   !单位 kg/m3
 FUEL_percentage=0.95            !TD%
@@ -168,10 +169,12 @@ UO2_DENSITY=UO2_IDEALDENSITY*FUEL_percentage
 
      R(1)=0.                          !Initial radius,在程序中不能变
      R(NH+1)= DI/2.0                  !cladding radius 
+    
      R(NH+2)= D0/2.0  
      DLTX=RFS/(NH-1) 
      DO I=2,NH
      R(I)=R(I-1)+DLTX 
+
      END DO
      !write(*,*) R
      !pause
@@ -1148,7 +1151,8 @@ deng=strain_fuel(11,2)
      
 
      d_length_p=strain_fuel(11,3)*DH                          !其实任何一个径向出点轴向应变是一样的
-
+     
+     
      !write(*,*) 
 
      !pause

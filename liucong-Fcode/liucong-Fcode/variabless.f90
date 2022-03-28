@@ -53,7 +53,7 @@
     real,allocatable::k_fuel(:,:,:)                 !!!!任意时刻，任意位置处，芯块热导率，单位W/m*K
     real,allocatable::P_SQUARE(:,:,:)               !!!!任意时刻，任意位置处，体积功率，单位W/m3
     
-    
+    real(8),allocatable::X_FC(:,:)                  !气隙宽度
     real(8),allocatable::T_pre(:)
     real(8),allocatable::T_now(:)
     real(8),allocatable::Bu_begin(:)
@@ -80,6 +80,9 @@
     real(8),allocatable::strain_cladding_z(:)
     real(8),allocatable::stress_equ_wh(:,:)
     real(8),allocatable::strain_fuel_wh(:,:,:)
+    real(8),allocatable::B_A(:)
+    real(8),allocatable::Temperature_gap(:)
+    
     dimension strain_z_lasttime(2),strain_z_lasttime111(2)
     double precision strain_z_lasttime,strain_z_lasttime111
     double precision p_line,Bu_end
@@ -274,6 +277,13 @@
     allocate(stress_equ_wh(n_axis,n_radial+n_clad))
     allocate(strain_fuel_wh(n_axis,n_radial,3))
     allocate(Temperature_JS(n_axis))
+    allocate(X_FC(time,n_axis))
+    allocate(B_A(n_axis))
+    allocate(Temperature_gap(n_axis))
+    
+    
+    
+    
     if (model_identification==2.AND.transient_mode==1) then
         allocate(Temperature_transient(t_number,n_axis,n_radial+3))
         allocate(T_transient(t_number))
@@ -297,6 +307,7 @@
     end if
     do_original=pellet_diameter+2*gas_gap+2*cladding_width
     di_original=pellet_diameter+2*gas_gap
+    X_FC=gas_gap
     d(:,:,n_radial+2)=pellet_diameter+2*gas_gap+2*cladding_width    !!!!初始时刻，包壳外径，单位m
     d(:,:,n_radial+1)=pellet_diameter+2*gas_gap                     !!!!初始时刻，包壳内径，单位m
     coolant_S=pitch**2.-pi/4.*(pellet_diameter+2*gas_gap+&          !!!!流通面积，单位m2
