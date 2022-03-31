@@ -45,8 +45,8 @@
         plastic=0.
         strain_z_lasttime=0.
         strain_z_lasttime111=0.
-        press_inter=2.5
-        press_begin=2.5
+        press_inter=5.
+        press_begin=5.
 
         d_length_spring=0.02    !m，初始受压
         d_length_p=0.
@@ -65,22 +65,18 @@
             end do
         end do
 
-
+X_FC=gas_gap
 
         !时间循环开始
         do i=1,time     !单位day
-            day=1.*i
+            
+            day=5.*i
             time_total=day*24.
-            time_increment=24.
+            time_increment=5.*24.
 
 
             do j=1,n_axis                                           !!!!!!!!!!!!!!!轴向循环
-                if (i>1) then
-                    do k=1,n_radial
-                        d(i,j,k)=(k-1)*(d(i-1,j,12)-2.*X_FC(i-1,j))/(n_radial-1)
-
-                    end do
-                end if
+              
                 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!功率计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!功率计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!功率计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -98,10 +94,7 @@
                 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!冷却剂温度计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 !write(1002,*)"冷却剂温度输出"
 
-                call coolant_physical_properties(j)
-                call coolant_T_calculation(j)           !!!!!!冷却剂温度计算
-                Temperature(:,j,n_radial+3)=coolant_T   !!!!!!冷却剂温度更新
-                !write(1002,"(f9.3)")coolant_T
+              
 
                 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!冷却剂温度计算结束!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!冷却剂温度计算结束!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -135,7 +128,17 @@
                 Temperature_JS(j)=0.
 
                 do while(ABS(Temperature_gap(j)-Temperature_JS(j))/Temperature_gap(j)>0.1)
+                    
                     Temperature_JS(j)=Temperature_gap(j)
+                     do k=1,n_radial
+                        d(i,j,k)=(k-1)*(d(i,j,12)-2.*X_FC(i,j))/(n_radial-1)
+
+                    end do
+                      call coolant_physical_properties(j)
+                call coolant_T_calculation(j)           !!!!!!冷却剂温度计算
+                Temperature(:,j,n_radial+3)=coolant_T   !!!!!!冷却剂温度更新
+                !write(1002,"(f9.3)")coolant_T
+                    
                     call axis_T_calculation(i,j)                        !!!!!!!!!!!!!!!轴向温度计算
                     call axis_T_update(i,j)                             !!!!!!!!!!!!!!!温度更新
                     call Bu_calculation(i,j)                            !!!!!!!!!!!!!!!燃耗计算
@@ -149,9 +152,12 @@
                             T_pre(k)=Temperature(i-1,j,k)
                             T_now(k)=Temperature(i,j,k)
                         end if
-                        Bu_begin(k)=4.*p_line(j)/(pi*(d(i,j,11)**2))*(day-1)/(UO2_density*238./270.)/10.**6.
-                        Bu_end(k)=4.*p_line(j)/(pi*(d(i,j,11)**2))*day/(UO2_density*238./270.)/10.**6.
+                        p_line=16000.
+                  BU_BEGIN(k)=4.*p_LINE(j)/(pi*(d(i,j,12)-2.*X_FC(I,j))**2.)*(day-5.)/(UO2_DENSITY*238./270.)/(10.**6.)
+      BU_END(k)=4.*p_LINE(j)/(pi*(d(i,j,12)-2.*X_FC(I,j))**2.)*day/(UO2_DENSITY*238./270.)/(10.**6.)
+                   
                     end do
+                  
                     !热工计算结束
 
                     !机械计算开始
@@ -161,8 +167,7 @@
                         &N_CLAD,d_length_spring,d_length_p(j),d_length_c(j),yield_stress,yield_stress111,strain_plastic,strain_plastic111&
                         &,aaa,strain_z_lasttime,strain_z_lasttime111,stress_equ,strain_fuel,strain_creep,strain_creep111&
                         &,stress_cladding_z111,strain_cladding_z111)
-
-
+ 
                     !if (2.*UR_PRA(12)<d(i,j,11))then
                     !    ur_pra(12)=d(i,j,11)
                     !    pause
@@ -183,6 +188,7 @@
                     IF(X_FC(I,j).LE.(5.*10**(-9.))) THEN !内部压力过大，可能会出现PC在分离的情况
                         X_FC(I,j)=0.
                     END IF
+                    
                     Temperature_gap(j)=q_line(j)/(pi*d(i,j,12))/5678.
 
                     d(i,j,12)=2.*UR_PRA(12)

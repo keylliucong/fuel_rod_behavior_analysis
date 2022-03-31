@@ -298,13 +298,15 @@ END DO
 	      l_densification_pre(I)=(-3.0+0.93*EXP(-BU_BEGIN(I))+2.07*EXP(-35.*BU_BEGIN(I))-l_densification_begin)*0.01
 	   END IF	   	   
 	   BU_exchange(I)=BU_BEGIN(I)+DELBU(I)
+      
        IF(BU_exchange(I).LT.BU_coordinate) then
 	      l_densification(I)=0.
 	   ELSE
 	      l_densification(I)=(-3.0+0.93*EXP(-BU_exchange(I))+2.07*EXP(-35.*BU_exchange(I))-l_densification_begin)*0.01
 	   END IF
           
-
+print*,l_densification(I)
+pause
           soldsw_pre(i)=1.0*7.435*(10.**(-13.))*UO2_DENSITY*BU_BEGIN(I)*24.*3600.
           soldsw(I)=1.0*7.435*(10.**(-13.))*UO2_DENSITY*BU_exchange(I)*24.*3600.
           swell(I)=1.0/3.*soldsw(I)
@@ -313,6 +315,7 @@ END DO
 
           l_strain_pre(I)=l_Thermal_expansion_pre(I)+0.68*l_densification_pre(I)+swell_pre(i)
 		  l_strain(I)=l_Thermal_expansion(I)+0.68*l_densification(I)+swell(I)
+         
           !write(*,*) i,l_Thermal_expansion(I),l_densification(I),swell(I)
           !pause
 
@@ -454,6 +457,7 @@ END DO
          m_B(i,3)=YY(3)
 
        end if
+      
 
        !write(*,*) i
        !write(*,*) m_l(i,1,1),m_l(i,1,2),m_l(i,1,3)
@@ -555,7 +559,7 @@ END DO
      stress_fuel(1,3)=XXX(3)
 
      stress_equ(1)=(0.5*((stress_fuel(1,1)-stress_fuel(1,2))**2+(stress_fuel(1,1)-stress_fuel(1,3))**2+(stress_fuel(1,2)-stress_fuel(1,3))**2))**0.5
-
+ 
      !write(*,*)  XXX
      !write(*,*)  stress_equ(1)/1.d6
      !pause
@@ -1255,11 +1259,14 @@ end do
   do i=1,N_CLAD
        
        tem_cladding(i)=T_NOW(nh+1)+(i-1)*(T_NOW(nh+2)-T_NOW(nh+1))/(N_CLAD-1)
+     
        temperature_cladding=T_NOW(nh+1)+(i-1)*(T_NOW(nh+2)-T_NOW(nh+1))/(N_CLAD-1)
+      
      if (temperature_cladding<1083.) then
        strain_thermal_cladding_r=1.*(4.95d-6*temperature_cladding-1.485d-3)
        strain_thermal_cladding_z=1.*(1.26d-5*temperature_cladding-3.78d-3)
        strain_thermal_cladding_c=strain_thermal_cladding_r
+  
      else if (temperature_cladding<1244.) then
        strain_thermal_cladding_r=(2.77763+1.09822*cos(3.14159265*(temperature_cladding-1083.)/161.))/1000.
        strain_thermal_cladding_z=(2.77763+1.09822*cos(3.14159265*(temperature_cladding-1083.)/161.))/1000.
@@ -1276,9 +1283,11 @@ end do
 
      !write(*,*) temperature_cladding
           !特征应变量计算，注意是大矩阵
+
           strain_intrinsic(NH+i,1)=strain_thermal_cladding_r+strain_plastic(NH+i,1)+d_strain_plastic(NH+i,1)+strain_creep(i,1)+d_strain_creep(i,1)
           strain_intrinsic(NH+i,2)=strain_thermal_cladding_c+strain_plastic(NH+i,2)+d_strain_plastic(NH+i,2)+strain_creep(i,2)+d_strain_creep(i,2)
           strain_intrinsic(NH+i,3)=strain_thermal_cladding_z+strain_plastic(NH+i,3)+d_strain_plastic(NH+i,3)+strain_creep(i,3)+d_strain_creep(i,3)
+    
           !write(*,*) strain_intrinsic(NH+i,1),strain_intrinsic(NH+i,2),strain_intrinsic(NH+i,3)
           !write(*,*) strain_thermal_cladding_r,strain_thermal_cladding_c,strain_thermal_cladding_z
    end do
@@ -1628,7 +1637,7 @@ else
        if (stress_equ(i)>yield_stress(i)) then
 
        write(*,*) i,"进入塑性"
-      
+   
 
          d_strain_plastic(i,1)=-0.0001
          d_strain_plastic(i,2)=0.
@@ -1971,6 +1980,7 @@ do while ((factor3>0.05))    !do while，塑性迭代
         strain_clad(i,1)=1./m_elastic(nh+i)*(stress_clad(i,1)-Poisson_ration(nh+i)*(stress_clad(i,2)+stress_clad(i,3)))+strain_intrinsic(nh+i,1)
         strain_clad(i,2)=1./m_elastic(nh+i)*(stress_clad(i,2)-Poisson_ration(nh+i)*(stress_clad(i,1)+stress_clad(i,3)))+strain_intrinsic(nh+i,2)
         strain_clad(i,3)=1./m_elastic(nh+i)*(stress_clad(i,3)-Poisson_ration(nh+i)*(stress_clad(i,2)+stress_clad(i,1)))+strain_intrinsic(nh+i,3)
+     
         !if (i==1) then
         !write(*,*) stress_clad(i,1),stress_clad(i,2),stress_clad(i,3)
         !write(*,*) m_elastic(nh+i),Poisson_ration(nh+i)
@@ -2132,7 +2142,9 @@ end if    !有节点进入塑性
      UR_PRA(nh+1)=(1.+strain_clad(1,2))*R(nh+1) 
      UR_PRA(nh+2)=(1.+strain_clad(n_clad,2))*R(nh+n_clad) 
      d_length_c=strain_clad(1,3)*DH
+    
 
+ 
 
      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!包壳位移初步计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!包壳位移初步计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2182,6 +2194,7 @@ end if    !有节点进入塑性
         creep_total=creep_saturated_primary*(1.-exp(-52.*(creep_rate_add*time_total)**0.5))+creep_rate_add*time_total
         creep_rate_total=52.*creep_saturated_primary*(creep_rate_add**0.5)/2./(time_total**0.5)*&
         &exp(-52.*(creep_rate_add*time_total)**0.5)+creep_rate_add
+      
         !write(*,*)  creep_saturated_primary,creep_total,creep_rate_total
         !pause
 
@@ -2192,6 +2205,7 @@ end if    !有节点进入塑性
         d_strain_creep(i3,1)=1.5*creep_rate_total*time_increment*s1/stress_equ(i3+nh)
         d_strain_creep(i3,2)=1.5*creep_rate_total*time_increment*s2/stress_equ(i3+nh)
         d_strain_creep(i3,3)=1.5*creep_rate_total*time_increment*s3/stress_equ(i3+nh)
+    
         !write(*,*) d_creep_cladding_r,d_creep_cladding_c,d_creep_cladding_z
         !pause
             
@@ -3523,6 +3537,7 @@ deng=strain_fuel(11,2)
      end do
      UR_PRA(nh+1)=(1.+strain_clad(1,2))*R(nh+1) 
      UR_PRA(nh+2)=(1.+strain_clad(n_clad,2))*R(nh+n_clad) 
+   
      !write(*,*) UR_PRA(11),R(11),UR_PRA(11)-R(11)
      
 

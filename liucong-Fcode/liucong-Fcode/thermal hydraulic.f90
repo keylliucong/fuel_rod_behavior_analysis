@@ -13,9 +13,10 @@
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!功率计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     subroutine power_calculation
     integer i
-    real(8)::a,b
+    real(8)::a,b,add
 
     p_line_max=p_line_average*p_line_factor
+    add=0.
     x=0.                                !!!!假定功率函数截尾位置
     Fq=0.                               !!!!迭代赋值
     do while(abs(Fq-p_line_factor)>0.005)
@@ -35,7 +36,9 @@
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         do i=1,n_axis
         p_line(i)=p_line_max*sin(x+(i-1)*(pi-2*x)/(1.0*(n_axis-1)))
-    end do
+        
+        end do
+     
     do i=1,n_axis
         a=0
         b=0
