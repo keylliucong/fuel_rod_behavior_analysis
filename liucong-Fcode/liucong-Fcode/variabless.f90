@@ -20,7 +20,7 @@
     real(8)::d_length_spring            !弹簧压缩长度，m
     real(8)::aaa                        !周向应变，输出值
     real(8)::stress_cladding_z111,strain_cladding_z111
-    
+    real(8)::factor(21)
     
     
     
@@ -82,6 +82,7 @@
     real(8),allocatable::strain_fuel_wh(:,:,:)
     real(8),allocatable::B_A(:)
     real(8),allocatable::Temperature_gap(:)
+    real(8),allocatable::h_gass(:,:)
     
     dimension strain_z_lasttime(2),strain_z_lasttime111(2)
     double precision strain_z_lasttime,strain_z_lasttime111
@@ -168,6 +169,7 @@
     if (model_identification==1) then
         open(1001,file='wentaishuru\canshushuru.txt')
         open(1002,file='wentaishuchu\canshushuchu.txt')
+        open(1111,file='wentaishuru\轴向功率因子.txt')
     else
         if (transient_mode==1)then
             open(1003,file='shuntaishuru\shuntaicanshushuru001.txt')
@@ -196,6 +198,9 @@
         read (1001,*) coolant_V_flow,coolant_T_in,cladding_length,cladding_width,gas_gap,pitch
         read (1001,*)
         read (1001,*) pellet_diameter
+        do i=1,21
+        read (1111,*) factor(i)
+        end do
         !---------------------------------------------------------------------------------参数初始化
         call variable_return
     else
@@ -280,7 +285,7 @@
     allocate(X_FC(time,n_axis))
     allocate(B_A(n_axis))
     allocate(Temperature_gap(n_axis))
-    
+    allocate(h_gass(time,n_axis))
     
     
     

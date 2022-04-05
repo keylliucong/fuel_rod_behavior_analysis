@@ -65,18 +65,18 @@
             end do
         end do
 
-X_FC=gas_gap
+        X_FC=gas_gap
 
         !时间循环开始
         do i=1,time     !单位day
-            
+
             day=5.*i
             time_total=day*24.
             time_increment=5.*24.
 
 
             do j=1,n_axis                                           !!!!!!!!!!!!!!!轴向循环
-              
+
                 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!功率计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!功率计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!功率计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -94,7 +94,7 @@ X_FC=gas_gap
                 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!冷却剂温度计算!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 !write(1002,*)"冷却剂温度输出"
 
-              
+
 
                 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!冷却剂温度计算结束!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!冷却剂温度计算结束!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -126,19 +126,19 @@ X_FC=gas_gap
                 !迭代问题设初值
                 Temperature_gap(j)=200.
                 Temperature_JS(j)=0.
-
+h_gass=5678.
                 do while(ABS(Temperature_gap(j)-Temperature_JS(j))/Temperature_gap(j)>0.1)
-                    
+                  
                     Temperature_JS(j)=Temperature_gap(j)
-                     do k=1,n_radial
+                    do k=1,n_radial
                         d(i,j,k)=(k-1)*(d(i,j,12)-2.*X_FC(i,j))/(n_radial-1)
 
                     end do
-                      call coolant_physical_properties(j)
-                call coolant_T_calculation(j)           !!!!!!冷却剂温度计算
-                Temperature(:,j,n_radial+3)=coolant_T   !!!!!!冷却剂温度更新
-                !write(1002,"(f9.3)")coolant_T
-                    
+                    call coolant_physical_properties(j)
+                    call coolant_T_calculation(j)           !!!!!!冷却剂温度计算
+                    Temperature(:,j,n_radial+3)=coolant_T   !!!!!!冷却剂温度更新
+                    !write(1002,"(f9.3)")coolant_T
+
                     call axis_T_calculation(i,j)                        !!!!!!!!!!!!!!!轴向温度计算
                     call axis_T_update(i,j)                             !!!!!!!!!!!!!!!温度更新
                     call Bu_calculation(i,j)                            !!!!!!!!!!!!!!!燃耗计算
@@ -152,12 +152,12 @@ X_FC=gas_gap
                             T_pre(k)=Temperature(i-1,j,k)
                             T_now(k)=Temperature(i,j,k)
                         end if
-                        p_line=16000.
-                  BU_BEGIN(k)=4.*p_LINE(j)/(pi*(d(i,j,12)-2.*X_FC(I,j))**2.)*(day-5.)/(UO2_DENSITY*238./270.)/(10.**6.)
-      BU_END(k)=4.*p_LINE(j)/(pi*(d(i,j,12)-2.*X_FC(I,j))**2.)*day/(UO2_DENSITY*238./270.)/(10.**6.)
-                   
+                     
+                        BU_BEGIN(k)=4.*p_LINE(j)/(pi*(d(i,j,12)-2.*X_FC(I,j))**2.)*(day-5.)/(UO2_DENSITY*238./270.)/(10.**6.)
+                        BU_END(k)=4.*p_LINE(j)/(pi*(d(i,j,12)-2.*X_FC(I,j))**2.)*day/(UO2_DENSITY*238./270.)/(10.**6.)
+
                     end do
-                  
+
                     !热工计算结束
 
                     !机械计算开始
@@ -167,7 +167,7 @@ X_FC=gas_gap
                         &N_CLAD,d_length_spring,d_length_p(j),d_length_c(j),yield_stress,yield_stress111,strain_plastic,strain_plastic111&
                         &,aaa,strain_z_lasttime,strain_z_lasttime111,stress_equ,strain_fuel,strain_creep,strain_creep111&
                         &,stress_cladding_z111,strain_cladding_z111)
- 
+
                     !if (2.*UR_PRA(12)<d(i,j,11))then
                     !    ur_pra(12)=d(i,j,11)
                     !    pause
@@ -189,7 +189,9 @@ X_FC=gas_gap
                         X_FC(I,j)=0.
                     END IF
                     
-                    Temperature_gap(j)=q_line(j)/(pi*d(i,j,12))/5678.
+call h_gas_calculation(i,j)
+
+                    Temperature_gap(j)=q_line(j)/(pi*d(i,j,12))/h_gass(i,j)
 
                     d(i,j,12)=2.*UR_PRA(12)
 

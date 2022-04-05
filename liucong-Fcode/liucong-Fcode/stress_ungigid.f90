@@ -305,8 +305,7 @@ END DO
 	      l_densification(I)=(-3.0+0.93*EXP(-BU_exchange(I))+2.07*EXP(-35.*BU_exchange(I))-l_densification_begin)*0.01
 	   END IF
           
-print*,l_densification(I)
-pause
+
           soldsw_pre(i)=1.0*7.435*(10.**(-13.))*UO2_DENSITY*BU_BEGIN(I)*24.*3600.
           soldsw(I)=1.0*7.435*(10.**(-13.))*UO2_DENSITY*BU_exchange(I)*24.*3600.
           swell(I)=1.0/3.*soldsw(I)

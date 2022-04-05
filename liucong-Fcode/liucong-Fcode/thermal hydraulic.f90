@@ -14,8 +14,9 @@
     subroutine power_calculation
     integer i
     real(8)::a,b,add
-
+add=0.
     p_line_max=p_line_average*p_line_factor
+    p_line_max=16000.
     add=0.
     x=0.                                !!!!假定功率函数截尾位置
     Fq=0.                               !!!!迭代赋值
@@ -36,9 +37,12 @@
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         do i=1,n_axis
         p_line(i)=p_line_max*sin(x+(i-1)*(pi-2*x)/(1.0*(n_axis-1)))
-        
+        p_line(i)=p_line_max*factor(i)
+       add=add+p_line(i)
         end do
-     
+     do i=1,n_axis
+         p_line(i)=p_line_max*p_line(i)*n_axis/add
+         end do
     do i=1,n_axis
         a=0
         b=0
@@ -46,6 +50,7 @@
         b=(i-2)*cladding_length/((n_axis-2)*1.0)
         Q_line(i)=p_line_max*cladding_length/(pi-2*x)*(cos(x+b*(pi-2*x)/cladding_length)-cos(x+a*(pi-2*x)/cladding_length))
     end do
+    
     end subroutine
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!功率计算结束!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!功率计算结束!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -107,7 +112,9 @@
         cladding_T=cladding_T_internal
     enddo
     !包壳迭代计算结束
-    pellet_T_surface=cladding_T_internal+p_line(n_a)/(pi*d(time,n_a,n_radial)*Kg(coolant_kind))
+    pellet_T_surface=cladding_T_internal+p_line(n_a)/pi*d(time,n_a,n_radial)/h_gass(time,n_a)
+    
+    
     end subroutine
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!轴向温度计算结束!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!轴向温度计算结束!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -259,11 +266,11 @@
                 B(i)=-1.*(P_SQUARE(time11,n_a,i)*(re-rw)*(re+rw)/2.+transient(i)*Temperature_mid(time11,n_a,i))
             else if (i==n_radial) then
                 A(i,i-1)=k_fuel(time11,n_a,i)/d_re
-                A(i,i+1)=Kg(coolant_kind)
+                A(i,i+1)=h_gass(time11,n_a)
                 A(i,i)=-(A(i,i-1)+A(i,i+1))
                 B(i)=0
             else if (i==n_radial+1) then
-                A(i,i-1)=Kg(coolant_kind)*d(time11,n_a,n_radial)/d(time11,n_a,n_radial+1)
+                A(i,i-1)=h_gass(time11,n_a)*d(time11,n_a,n_radial)/d(time11,n_a,n_radial+1)
                 A(i,i+1)=Kc(Temperature_transient(time11,n_a,i),cladding_T_surface)/d_rw
                 A(i,i)=-(A(i,i-1)+A(i,i+1))
                 B(i)=0
