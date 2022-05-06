@@ -126,9 +126,9 @@
                 !迭代问题设初值
                 Temperature_gap(j)=200.
                 Temperature_JS(j)=0.
-h_gass=5678.
+                h_gass=5678.
                 do while(ABS(Temperature_gap(j)-Temperature_JS(j))/Temperature_gap(j)>0.1)
-                  
+
                     Temperature_JS(j)=Temperature_gap(j)
                     do k=1,n_radial
                         d(i,j,k)=(k-1)*(d(i,j,12)-2.*X_FC(i,j))/(n_radial-1)
@@ -152,7 +152,7 @@ h_gass=5678.
                             T_pre(k)=Temperature(i-1,j,k)
                             T_now(k)=Temperature(i,j,k)
                         end if
-                     
+
                         BU_BEGIN(k)=4.*p_LINE(j)/(pi*(d(i,j,12)-2.*X_FC(I,j))**2.)*(day-5.)/(UO2_DENSITY*238./270.)/(10.**6.)
                         BU_END(k)=4.*p_LINE(j)/(pi*(d(i,j,12)-2.*X_FC(I,j))**2.)*day/(UO2_DENSITY*238./270.)/(10.**6.)
 
@@ -188,8 +188,8 @@ h_gass=5678.
                     IF(X_FC(I,j).LE.(5.*10**(-9.))) THEN !内部压力过大，可能会出现PC在分离的情况
                         X_FC(I,j)=0.
                     END IF
-                    
-call h_gas_calculation(i,j)
+
+                    call h_gas_calculation(i,j)
 
                     Temperature_gap(j)=q_line(j)/(pi*d(i,j,12))/h_gass(i,j)
 
